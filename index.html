@@ -1,0 +1,303 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+        }
+
+        #quiz-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        #question {
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            margin: 5px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .option-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #next-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #next-btn:hover {
+            background-color: #218838;
+        }
+
+        #display {
+            width: calc(100% - 20px);
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 20px;
+        }
+
+        #buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 10px;
+        }
+
+        .button {
+            padding: 10px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        #todo-app {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #todo-input {
+            width: calc(100% - 85px);
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        #add-btn {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #add-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #todo-list {
+            margin-top: 20px;
+            padding: 0;
+            list-style-type: none;
+        }
+
+        li {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .delete-btn {
+            padding: 5px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <h2 id="question"></h2>
+        <div id="options"></div>
+        <button id="next-btn">Next Question</button>
+    </div>
+
+    <div id="calculator">
+        <input type="text" id="display" readonly>
+        <div id="buttons">
+            <button class="button" onclick="appendToDisplay('7')">7</button>
+            <button class="button" onclick="appendToDisplay('8')">8</button>
+            <button class="button" onclick="appendToDisplay('9')">9</button>
+            <button class="button" onclick="appendToDisplay('+')">+</button>
+            <button class="button" onclick="appendToDisplay('4')">4</button>
+            <button class="button" onclick="appendToDisplay('5')">5</button>
+            <button class="button" onclick="appendToDisplay('6')">6</button>
+            <button class="button" onclick="appendToDisplay('-')">-</button>
+            <button class="button" onclick="appendToDisplay('1')">1</button>
+            <button class="button" onclick="appendToDisplay('2')">2</button>
+            <button class="button" onclick="appendToDisplay('3')">3</button>
+            <button class="button" onclick="appendToDisplay('*')">*</button>
+            <button class="button" onclick="appendToDisplay('0')">0</button>
+            <button class="button" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="calculate()">=</button>
+            <button class="button" onclick="appendToDisplay('/')">/</button>
+        </div>
+    </div>
+
+    <div id="todo-app">
+        <h1>To-Do List</h1>
+        <input type="text" id="todo-input" placeholder="Enter a new task">
+        <button id="add-btn">Add Task</button>
+        <ul id="todo-list"></ul>
+    </div>
+
+    <script>
+
+        const quizData = [
+            {
+                question: "What is the capital of Philippines?",
+                options: ["Manila", "Cebu", "Mindanao", "Laguna"],
+                correctAnswer: "Manila"
+            },
+            {
+                question: "What is 4 * 2?",
+                options: ["6", "8", "10", "12"],
+                correctAnswer: "8"
+            },
+            {
+                question: "Who wrote 'The Catcher in the Rye'?",
+                options: ["J.D. Salinger", "Harper Lee", "F. Scott Fitzgerald", "Ernest Heming  way"],
+                correctAnswer: "J.D. Salinger"
+            }
+            // Add more questions here
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+
+        const questionElement = document.getElementById("question");
+        const optionsElement = document.getElementById("options");
+        const nextButton = document.getElementById("next-btn");
+
+        function loadQuestion() {
+            const currentQuizData = quizData[currentQuestion];
+            questionElement.innerText = currentQuizData.question;
+
+            optionsElement.innerHTML = "";
+            currentQuizData.options.forEach(option => {
+                const button = document.createElement("button");
+                button.innerText = option;
+                button.classList.add("option-btn");
+                button.addEventListener("click", selectOption);
+                optionsElement.appendChild(button);
+            });
+        }
+
+        function selectOption(event) {
+            const selectedOption = event.target.innerText;
+            const currentQuizData = quizData[currentQuestion];
+
+            if (selectedOption === currentQuizData.correctAnswer) {
+                score++;
+            }
+
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                endQuiz();
+            }
+        }
+
+        function endQuiz() {
+            questionElement.innerText = `You have completed the quiz! Your score is ${score}/${quizData.length}.`;
+            optionsElement.innerHTML = "";
+            nextButton.style.display = "none";
+        }
+
+        nextButton.addEventListener("click", loadQuestion);
+
+        loadQuestion();
+
+        function appendToDisplay(value) {
+        document.getElementById("display").value += value;
+    }
+
+    function clearDisplay() {
+        document.getElementById("display").value = "";
+    }
+
+    function calculate() {
+        const expression = document.getElementById("display").value;
+        try {
+            const result = eval(expression);
+            document.getElementById("display").value = result;
+        } catch (error) {
+            document.getElementById("display").value = "Error";
+        }
+    }
+
+    const todoInput = document.getElementById("todo-input");
+        const addBtn = document.getElementById("add-btn");
+        const todoList = document.getElementById("todo-list");
+
+        addBtn.addEventListener("click", addTask);
+        todoList.addEventListener("click", deleteTask);
+
+        function addTask() {
+            const taskText = todoInput.value.trim();
+
+            if (taskText !== "") {
+                const listItem = document.createElement("li");
+                listItem.textContent = taskText;
+
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "❌";
+                deleteButton.classList.add("delete-btn");
+
+                listItem.appendChild(deleteButton);
+                todoList.appendChild(listItem);
+
+                todoInput.value = "";
+            }
+        }
+
+        function deleteTask(event) {
+            if (event.target.classList.contains("delete-btn")) {
+                const listItem = event.target.parentElement;
+                listItem.remove();
+            }
+        }
+
+    </script>
+</body>
+</html>
